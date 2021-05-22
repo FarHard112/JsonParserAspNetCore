@@ -1,5 +1,5 @@
 ﻿@using Microsoft.CodeAnalysis.CSharp.Syntax
-@model JsonObjectsViewModel 
+@model List<UsersPost>
 
 
 
@@ -12,39 +12,39 @@
 
 <table class="table" id="myTable">
     <thead>
-    <tr>
-        <th scope="col">ID</th>
-        <th scope="col">Title</th>
-        <th scope="col">Content</th>
-        <th scope="col">UserId</th>
-        <th scope="col">Comments</th>
-       
-    </tr>
-    </thead>
-    
-    <tbody>
- 
-    @foreach (var item in Model.userPosts)
-    {
         <tr>
-            <td>@item.Id</td>
-            <td>@item.Body</td>
-            <td>@item.Title</td>
-            <td>@item.UserId</td>
-         
-            
-            <td><button data-target="#loginModal" data-toggle="modal" asp-action="" asp-route-id="@item.Id">Comments</button></td>
-            
+            <th scope="col">ID</th>
+            <th scope="col">Title</th>
+            <th scope="col">Content</th>
+            <th scope="col">UserId</th>
+            <th scope="col">Comments</th>
+
         </tr>
-   
-    }
-  
-  
+    </thead>
+
+    <tbody>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.Body</td>
+                <td>@item.Title</td>
+                <td>@item.UserId</td>
+
+
+                <td><button data-target="#loginModal" data-toggle="modal" data-id="@item.Id" class="loadComment">Comments</button></td>
+
+            </tr>
+
+        }
+
+
     </tbody>
 </table>
 
 
-@*Modal*@
+
 <div class="modal fade" tabindex="-1" id="loginModal"
      data-keyboard="false" data-backdrop="static">
     <div class="modal-dialog modal-lg">
@@ -57,7 +57,7 @@
 
             </div>
             <div class="modal-body">
-                <table class="table" id="myTable">
+                <table class="table" id="commentList">
                     <thead>
                     <tr>
                         <th scope="col">ID</th>
@@ -65,34 +65,21 @@
                         <th scope="col">Name</th>
                         <th scope="col">Email</th>
                         <th scope="col">Body</th>
-                        
-       
+
+
                     </tr>
                     </thead>
-    
+
                     <tbody>
-                   
-                        @foreach (var item in Model.userComments.Where(x=>x.PostId==Model.userPosts[0].Id))
-                        {
-
-                            <tr>
-                                <td>@item.Id</td>
-                                <td>@item.PostId</td>
-                                <td>@item.Name</td>
-                                <td>@item.Email</td>
-                                <td>@item.Body</td>
 
 
-                            </tr>
-                        }
-                    
-                   
+
 
                     </tbody>
                 </table>
             </div>
             <div class="modal-footer">
-            
+
                 <button type="button" class="btn btn-primary"
                         data-dismiss="modal">
                     Close
@@ -101,5 +88,40 @@
         </div>
     </div>
 </div>
-
-
+@section Scripts
+{
+    <script>
+        $(document).ready(function () {
+            $(".loadComment").click(function () {
+                var id = $(this).data("id");
+                console.log(id);
+                $.ajax({
+                    url: 'https://jsonplaceholder.typicode.com/comments?postId='+id,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        var event_data = '';
+                        $.each(data, function(index, value){
+                            /*console.log(value);*/
+                            event_data += '<tr>';
+                            event_data += '<td>' + value.id+'</td>';
+                            event_data += '<td>' + value.postId + '</td>';
+                            event_data += '<td>' + value.name + '</td>';
+                            event_data += '<td>' + value.email + '</td>';
+                            event_data += '<td>' + value.body+'</td>';
+                            event_data += '</tr>';
+                        });
+                        console.log(event_data);
+                        $("#commentList tr").remove();
+                        $("#commentList").append(event_data);
+                        $("#loginModal").toggleClass("loadComment");
+                    },
+                    error: function (error) {
+                        console.log('Error in Operation');
+                    }
+                });
+            });
+        });
+    </script> 
+}
+  

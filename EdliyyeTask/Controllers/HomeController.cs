@@ -32,23 +32,26 @@ namespace EdliyyeTask.Controllers
 
         public async Task<IActionResult> GetUserData()
         {
-            JsonObjectsViewModel jsonObjectsView = new JsonObjectsViewModel();
-            var jsonPosts = (new WebClient()).DownloadString("https://jsonplaceholder.typicode.com/posts");
-            var jsonComments = (new WebClient()).DownloadString("https://jsonplaceholder.typicode.com/comments");
+
+            var jsonPosts =  (new WebClient()).DownloadString("https://jsonplaceholder.typicode.com/posts");
+
+
             JavaScriptSerializer ser = new JavaScriptSerializer();
             var userPosts = ser.Deserialize<List<UsersPost>>(jsonPosts);
-            var userComments = ser.Deserialize<List<UsersComments>>(jsonComments);
-            jsonObjectsView.userPosts = userPosts;
-            jsonObjectsView.userComments = userComments;
-      
-            
-                 
-            return View(jsonObjectsView);
+
+
+
+
+
+            return View(userPosts);
         }
 
-        public IActionResult GetDatabyId(int userCommentPostId)
+        public IActionResult GetDatabyId(int id)
         {
-            return View();
+            JavaScriptSerializer ser = new JavaScriptSerializer();
+            var jsonComments = (new WebClient()).DownloadString("https://jsonplaceholder.typicode.com/comments/"+id);
+            var userComments = ser.Deserialize<List<UsersComments>>(jsonComments);
+            return Json(userComments);
         }
         public IActionResult Privacy()
         {
